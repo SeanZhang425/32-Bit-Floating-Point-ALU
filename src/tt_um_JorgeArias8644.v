@@ -5,6 +5,7 @@ input  [7:0] ui_in,
 // input  [7:0] ui_in,
  // input [9:8] ui_in,
  output [7:0] uo_outx,
+ output [7:0] uo_out;
 input  [7:0] uio_in,
 output [7:0] uio_out,
 output [7:0] uio_oe,

@@ -7,14 +7,7 @@ TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 
 # Lista de archivos Verilog del proyecto
-PROJECT_SOURCES = \
-  tt_um_JorgeArias8644.v \
-  alu_8bit.v \
-  alu_1bit.v \
-  mux2.v \
-  mux4.v \
-  CLA.v \
-  xor3a1n.v
+PROJECT_SOURCES = ../src/tt_um_JorgeArias8644.v ../src/alu_8bit.v ../src/alu_1bit.v ../src/mux2.v ../src/mux4.v ../src/CLA.v ../src/xor3a1n.v
 
 ifneq ($(GATES),yes)
 
@@ -38,7 +31,7 @@ COMPILE_ARGS += -I$(SRC_DIR)
 
 # Incluir el testbench
 VERILOG_SOURCES += $(PWD)/tb.v
-TOPLEVEL = tb
+TOPLEVEL = tt_um_JorgeArias8644
 
 # Archivo de prueba en Python
 MODULE = test

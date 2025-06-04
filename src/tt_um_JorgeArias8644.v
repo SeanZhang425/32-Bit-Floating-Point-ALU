@@ -5,12 +5,12 @@ input  [7:0] ui_in,
 //input  [7:0] ui_in,
 // input [9:8] ui_in,
 output [7:0] uo_out,
- input [7:0] uio_in,
- output [7:0] uio_out,
- output [7:0] uio_oe,
-input clk,
-input ena,
-input rst_n
+ /*input  [7:0] uio_in,*/
+ /*output [7:0] uio_out,*/
+ /*output [7:0] uio_oe,*/
+/*input clk,*/
+/*input ena,*/
+/*input rst_n*/
 
 );
 
@@ -18,7 +18,7 @@ input rst_n
  reg [7:0] a       =  ui_in[7:0]; // Input variable A de 8 bits
  reg [7:0] b       =  ui_in[7:0]; // Input variable B de 8 bits
  reg [1:0] S       =  ui_in[1:0]; // Input selector de operación 
- wire [7:0] Result = uo_out[7:0]; // Output result operations
+// wire [7:0] Result = uo_out[7:0]; // Output result operations
 
  // Instancia del módulo alu_8bits
  alu_8bits alu_inst (

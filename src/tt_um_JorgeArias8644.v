@@ -7,9 +7,9 @@ input  [7:0] ui_in,
 output [7:0] uo_out,
 input  [7:0] uio_in,
  /*output [7:0] uio_out,*/
- output [7:0] uio_oe,
-input clk
-//input ena,
+output [7:0] uio_oe,
+input clk,
+input ena
 //input rst_n
 
 );

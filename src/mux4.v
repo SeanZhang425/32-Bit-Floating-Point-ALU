@@ -1,3 +1,5 @@
+// Multiplexor de 4 entradas, 1 salida y selector de entrada de 2 bits
+
 module mux4(
              input d0,d1,d2,d3,
              input [1:0]s,

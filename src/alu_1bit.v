@@ -4,7 +4,7 @@ module alu_1bit(
                 output result
                );
            wire int1,int2,int3,sum_out,cout_sum,mym;
-            reg n;
+          //  reg n;
 
            assign int1 = at & bt;
            assign int2 = at | bt;

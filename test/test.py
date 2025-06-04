@@ -2,7 +2,7 @@ import cocotb
 from cocotb.triggers import Timer
 
 @cocotb.test()
-asinc def test_basic_addition(dut):
+async def test_basic_addition(dut):
     # S = 00 (suma), a = 1, b = 2
     S = 00
     a = 1

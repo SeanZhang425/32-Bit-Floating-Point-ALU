@@ -1,4 +1,5 @@
 `default_nettype none
+`inlcude "alu_8bits.v"
 module tt_um_JorgeArias8644 (
     input  wire [7:0] ui_in,
     output wire [7:0] uo_out,

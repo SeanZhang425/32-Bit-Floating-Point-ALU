@@ -1,4 +1,4 @@
-module alu_1bit(
+module alu_1bits(
                 input  at,bt,
                 input  [1:0]ALUcontrol,
                 output result,Z,N,C,V

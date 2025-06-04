@@ -1,7 +1,7 @@
 module tt_um_JorgeArias8644(
 
 input  [7:0] ui_in,
-input  [7:0] ui_in,
+//input  [7:0] ui_in,
 input  [2:0] ui_in,
 output [7:0] uo_out,
 input clk,

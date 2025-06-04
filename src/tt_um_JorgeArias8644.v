@@ -18,7 +18,7 @@ input rst_n
  reg [7:0] a       =  ui_in [7:0]; // Input variable A de 8 bits
  reg [7:0] b       =  ui_in [7:0]; // Input variable B de 8 bits
  reg [1:0] S       =  ui_in [1:0]; // Input selector de operación 
- reg [7:0] R       =  uo_out[7:0]; // Output result operations
+ reg [7:0] R       =  uo_outx [7:0]; // Output result operations
 
  // Instancia del módulo alu_8bits
  alu_8bits alu_inst (

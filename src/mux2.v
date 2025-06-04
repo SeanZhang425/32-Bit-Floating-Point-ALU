@@ -1,3 +1,4 @@
+// Multiplexor de 2 entradas a una salida con selector
 module mux2(
             input d0, d1,
             input s,

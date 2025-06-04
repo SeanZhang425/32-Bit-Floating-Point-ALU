@@ -12,7 +12,7 @@ module tt_um_JorgeArias8644 (
 );
 
     // Señales internas
-    wire [7:0] a = ui_in;         // A y B son iguales aquí, puedes ajustar si quieres usar ui_in[7:4] y ui_in[3:0]
+    wire [7:0] a = ui_in;         // A y B son iguales aquí
     wire [7:0] b = ui_in;
     wire [1:0] S = ui_in[1:0];    // Selector de operación
     wire [7:0] R;                 // Resultado de la ALU

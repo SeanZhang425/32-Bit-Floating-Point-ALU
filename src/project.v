@@ -16,12 +16,23 @@ module tt_um_ALU (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-  // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-  assign uio_out = 0;
-  assign uio_oe  = 0;
-
-  // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
+    wire [7:0] alu_io_out;
+    wire [7:0] alu_io_oe;
+    
+    alu_top u_alu (
+        .clk    (clk),
+        .rst_n  (rst_n),
+        .in     (ui_in),
+        .out    (uo_out),
+        .io_in  (uio_in),
+        .io_out (alu_io_out),
+        .io_oe  (alu_io_oe)
+    );
+        
+    assign uio_out = alu_io_out;
+    assign uio_oe  = alu_io_oe;
+    
+    // List all unused inputs to prevent warnings
+    wire _unused = &{ena, clk, rst_n, 1'b0};
 
 endmodule

@@ -18,26 +18,22 @@ module tt_um_ALU (
     input  wire       clk,      // System clock provided by Tiny Tapeout
     input  wire       rst_n     // Active-low reset signal
 );
-    // Internal wires to carry the bidirectional I/O signals from alu_top
-    wire [7:0] alu_io_out;      // Output values to drive on IO pins
-    wire [7:0] alu_io_oe;       // Output enable mask for IO pins
+    // Set the direction for shared IO pins (it is static, direction never changes)
+    assign uio_oe  = 8'b1111_1000;     // io[7:4] outputs state, io[3] is the 'done' signal.
 
     // Instantiate the ALU top module with standard interface
     alu_top u_alu (
-        .clk    (clk),          // Connect clock
-        .rst_n  (rst_n),        // Connect active-low reset
-        .in     (ui_in),        // Operand input byte from input pins
-        .out    (uo_out),       // Result output byte to output pins
-        .io_in  (uio_in),       // Input side of bidirectional IO (e.g., opcode, start)
-        .io_out (alu_io_out),   // Output side of bidirectional IO (e.g., done, debug)
-        .io_oe  (alu_io_oe)     // Output enable signals for bidirectional IO
+        .clk     (clk),           // Connect clock
+        .rst_n   (rst_n),         // Connect active-low reset
+        .in      (ui_in),         // Operand input byte from input pins
+        .out     (uo_out),        // Result output byte to output pins
+        .opcode  (uio_in[1:0]),   // Opcode: choose which operation for ALU to do
+        .start   (uio_in[2])      // 'Start' signal: request ALU to do an operation
+        .done    (uio_out[3])     // 'Done' signal: ready for outputting
+        .state   (uio_out[7:4]),  // Current state of ALU
     );
 
-    // Drive the shared IO pins with the ALU's outputs and enables
-    assign uio_out = alu_io_out;    // Pass through output data from alu_top
-    assign uio_oe  = alu_io_oe;     // Pass through output enable mask from alu_top
-    
     // List all unused inputs to prevent warnings
-    wire _unused = &{ena, clk, rst_n, 1'b0};
+    wire _unused = &{ena, uio_in[7:3], 1'b0};
 
 endmodule

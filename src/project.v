@@ -28,9 +28,9 @@ module tt_um_32_bit_fp_ALU_S_M (
         .in      (ui_in),         // Operand input byte from input pins
         .out     (uo_out),        // Result output byte to output pins
         .opcode  (uio_in[1:0]),   // Opcode: choose which operation for ALU to do
-        .start   (uio_in[2])      // 'Start' signal: request ALU to do an operation
-        .done    (uio_out[3])     // 'Done' signal: ready for outputting
-        .state   (uio_out[7:4]),  // Current state of ALU
+        .start   (uio_in[2]),     // 'Start' signal: request ALU to do an operation
+        .done    (uio_out[3]),    // 'Done' signal: ready for outputting
+        .state   (uio_out[7:4])   // Current state of ALU
     );
 
     // List all unused inputs to prevent warnings

@@ -3,126 +3,120 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-`default_nettype none  // Disallow undeclared wires — forces explicit signals
-
+`default_nettype none
 module fp_addsub (
     input  wire [31:0] a,      // Input float A (IEEE 754 format)
     input  wire [31:0] b,      // Input float B (IEEE 754 format)
-    input  wire        sub,    // Operation select: 0 = add, 1 = subtract
-    output reg  [31:0] result  // Resulting float (IEEE 754 format)
+    input  wire sub,    // Operation select: 0 = add, 1 = subtract
+    output reg [31:0] result  // Resulting float (IEEE 754 format)
 );
 
     // Step 1: Unpack Inputs
 
-    // Extract sign bits
-    wire sign_a = a[31];              // Sign of A
-    wire sign_b = b[31] ^ sub;        // Sign of B (flip if subtracting)
+    wire sign_a = a[31];              // Sign bit of A
+    wire sign_b = b[31] ^ sub;        // Sign bit of B, flipped if we're subtracting
 
-    // Extract exponent bits
     // Note: For 32-bit float, exponent bias is 127, so exp_a and exp_b are actually in range [-126, 127]
-    //       (originally [0,255] -> (reserved) [1,254] -> (- bias) [-126,127])
-    wire [7:0] exp_a;      // Biased exponent of A (don't need to account for bias in addition/subtraction since the difference between them is the same)
-    wire [7:0] exp_b;      // Biased exponent of B
+    // (originally [0,255] -> (reserved) [1,254] -> (- bias) [-126,127])
+    wire [7:0] raw_exp_a = a[30:23];  // Raw exponent of A
+    wire [7:0] raw_exp_b = b[30:23];  // Raw exponent of B
+    
+    reg [7:0] exp_a;      // Final exponent of A (adjusted if subnormal)
+    reg [7:0] exp_b;      // Final exponent of B
 
-    // Extract mantissas and add implicit leading 1 if normalized
     // TODO: Check for exponent = all 1s (infinity or NaN) (currently does check for subnormal numbers correctly)
-    wire [23:0] man_a;
-    wire [23:0] man_b;
+    reg [23:0] man_a;     // Mantissa of A with implicit leading 1 if normalized
+    reg [23:0] man_b;     // Mantissa of B with implicit leading 1 if normalized
+    
+    // Handle normalized and subnormal numbers for both operands
     always @(*) begin
-        if (exp_a == 0) begin         // A subnormal number has biased exponenet as all 0s
-            man_a = {1'b0, a[22:0]};  // Append a 0 for subnormal number (0.something)
-            exp_a = a[30:23] + 1;     // Now, treat this number as if it had the smallest exponent (1 = 2^-126)
-        end else begin                // A normalized number otherwise
-            man_a = {1'b1, a[22:0]};  // Append a 1 for normalized number (1.something)
-            exp_a = a[30:23];         // Biased exponent
+        if (raw_exp_a == 8'd0) begin                  // A is subnormal
+            man_a = {1'b0, a[22:0]};                  // No implicit 1
+            exp_a = 8'd1;                             // Treat as exponent 1 (to allow alignment)
+        end else begin                                // A is normalized
+            man_a = {1'b1, a[22:0]};                  // Add implicit 1
+            exp_a = raw_exp_a;
         end
 
-        if (exp_b == 0) begin
+        if (raw_exp_b == 8'd0) begin                  // B is subnormal
             man_b = {1'b0, b[22:0]};
-            exp_b = b[30:23] + 1;
+            exp_b = 8'd1;
         end else begin
             man_b = {1'b1, b[22:0]};
-            exp_b = b[30:23];
+            exp_b = raw_exp_b;
         end
     end
 
     // Step 2: Align Exponents
 
-    // Calculate absolute exponent difference
-    wire [7:0] exp_diff = (exp_a >= exp_b) ? (exp_a - exp_b) : (exp_b - exp_a);
+    wire [7:0] exp_diff = (exp_a >= exp_b) ? (exp_a - exp_b) : (exp_b - exp_a);  // Difference in exponents
 
-    // Shift the smaller mantissa to align with the larger exponent
     // Note: Should be synthesizable via barrel shifter by Verilog
-    wire [23:0] man_a_shifted = (exp_a >= exp_b) ? man_a : (man_a >> exp_diff);
-    wire [23:0] man_b_shifted = (exp_a >= exp_b) ? (man_b >> exp_diff) : man_b;
+    wire [23:0] man_a_shifted = (exp_a >= exp_b) ? man_a : (man_a >> exp_diff);  // Shift A if it has smaller exponent
+    wire [23:0] man_b_shifted = (exp_a >= exp_b) ? (man_b >> exp_diff) : man_b;  // Shift B if it has smaller exponent
 
-    // Select the greater exponent as the base for the result
-    wire [7:0] exp_base = (exp_a >= exp_b) ? exp_a : exp_b;
-
+    wire [7:0] exp_base = (exp_a >= exp_b) ? exp_a : exp_b;  // Base exponent after alignment
+    
     // Step 3: Add/Subtract Aligned Mantissas
 
-    // Extend mantissas to 25 bits to handle overflow during addition
-    wire [24:0] extended_a = {1'b0, man_a_shifted};
+    wire [24:0] extended_a = {1'b0, man_a_shifted};   // Add leading 0 to prevent overflow
     wire [24:0] extended_b = {1'b0, man_b_shifted};
 
-    wire [24:0] sum;
-    wire        sign_res;
+    reg [24:0] sum;         // Result of addition or subtraction
+    reg sign_res;           // Final result sign
 
-    // Perform add or subtract depending on signs
-    assign {sign_res, sum} = (sign_a == sign_b) ?
-                                {sign_a, extended_a + extended_b} :         // Same sign → add
-                             (extended_a >= extended_b) ?                   // else, different sign means we need to check if A > B
-                                {sign_a, extended_a - extended_b} :         // A > B → A - B and keep A's sign (+100 + -9 = +(100 - 9), and -100 + +9 = -(100 - 9))
-                                {sign_b, extended_b - extended_a};          // B > A → B - A and keep B's sign (+9 + -100 = -(100 - 9), and -9 + +100 = +(100 - 9))
+    // Perform mantissa operation depending on operand signs
+    always @(*) begin
+        if (sign_a == sign_b) begin
+            sum = extended_a + extended_b;            // Same signs: perform addition
+            sign_res = sign_a;                        // Keep common sign
+        end else if (extended_a >= extended_b) begin
+            sum = extended_a - extended_b;            // A > B: subtract B from A
+            sign_res = sign_a;                        // Result takes A's sign
+        end else begin
+            sum = extended_b - extended_a;            // B > A: subtract A from B
+            sign_res = sign_b;                        // Result takes B's sign
+        end
+    end
 
     // Step 4: Normalize Result
 
-    wire [7:0] shift;          // Number of bits to left-shift to normalize (to put leading 1 at bit position 23)
-    reg  [7:0] exp_res;        // Final biased exponent after normalization
+    reg [7:0] shift;        // Number of left shifts needed to normalize
+    reg [7:0] exp_res;      // Adjusted exponent after normalization
+    reg found;              // Whether a 1 was found in sum[]
+    integer i;              // Loop index for leading-1 detection
 
     always @(*) begin
-        if (sum[24]) begin
-            // Carry bit, so result actually has a bigger exponent than base (5.2 * 10^2 + 5.3 * 10^2 = 10.5 * 10^2 = 1.05 * 10^3)
-            result[31]    = sign_res;   // Sign bit
-            result[30:23] = (exp_base + 1);    // Exponent (already biased)
-            result[22:0]  = sum[23:1];  // Drop implicit 1 and lose the least significant bit (we lose precision as the nubmer gets bigger)
+        if (sum[24] == 1'b1) begin                     // If overflow (carry-out from MSB)
+            result[31]    = sign_res;                  // Assign sign
+            result[30:23] = exp_base + 1;              // Exponent increments by 1
+            result[22:0]  = sum[23:1];                 // Drop LSB and implicit 1
         end else begin
-            // In case we have 1.432 * 10^2 - 1.431 * 10^2 = 0.001 * 10^2, we shift it to 1.000 * 10^-1
-            wire [7:0] shift = 0;
-            wire       found = 0;
-
-            // Find first '1' from MSB to LSB in the sum result
-            // Note: should be synthesizable combinationally since it's a fixed duration for loop, although 24 layers deep
-            for (wire [7:0] i = 0; i < 24; i++) begin
-                if (found)  // Skip if we've already found the first 1
-                    found = 1;
-                else if (sum[23 - i] & (exp_base > i)) begin
-                    shift = i;  // Number of leading zeros
-                    found = 1;
-                end else if (sum[23 - i]) begin
-                    // exp_base <= i means subnormal number (exp_base should be in range [1,254])
-                    shift = exp_base;
-                    found = 1;
-                end else  // Use else for mux, we don't want a flip-flop / latch
-                    found = 0;  // (not found, and current bit is not 1)
+            shift = 8'd0;
+            found = 1'b0;
+            for (i = 0; i < 24; i = i + 1) begin
+                if (!found && sum[23 - i]) begin       // Find the first 1 from MSB
+                    if (exp_base > i[7:0]) begin
+                        shift = i[7:0];                // Shift required
+                    end else begin
+                        shift = exp_base;              // Subnormal case
+                    end
+                    found = 1'b1;
+                end
             end
 
-            exp_res = exp_base - shift;  // Biased exponenet of result, should never underflow (become negative)
+            exp_res = exp_base - shift;                // Normalize exponent
 
-            // Step 5: Repack Result into IEEE Format
-
-            if (~found)
-                result = 32'd0;             // If found = 0, then sum[] is 0 (it had no 1s in it)
-            else if (exp_res == 0) begin
-                // Subnormal number
-                result[31]    = sign_res;   // Sign bit
-                result[30:23] = exp_res;    // Exponent (already biased)
-                result[22:0]  = sum[22:0];  // Don't do any shifting, as the number is subnormal
+            if (!found) begin
+                result = 32'd0;                        // If sum is zero
+            end else if (exp_res == 8'd0) begin
+                result[31]    = sign_res;              // Sign bit
+                result[30:23] = exp_res;               // Subnormal exponent
+                result[22:0]  = sum[22:0];             // Mantissa unshifted
             end else begin
-                // Normalized number
-                result[31]    = sign_res;   // Sign bit
-                result[30:23] = exp_res;    // Exponent (already biased)
-                result[22:0]  = (sum[22:0] << shift);  // Left shift mantissa without the first 1 by shift (is the same as shifting first and then taking the last 23 bits)
+                result[31]    = sign_res;              // Sign bit
+                result[30:23] = exp_res;               // Normalized exponent
+                result[22:0]  = (sum[22:0] << shift);  // Shifted mantissa
             end
         end
     end

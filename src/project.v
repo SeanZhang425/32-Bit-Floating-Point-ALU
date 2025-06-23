@@ -5,8 +5,8 @@
 
 `default_nettype none
 
-// Top-level module for the ALU project, must match the name in config.json
-module tt_um_ALU (
+// Top-level module for the ALU project, must match the name in info.yaml
+module tt_um_32_bit_fp_ALU_S_M (
     input  wire [7:0] ui_in,    // 8-bit dedicated input bus (operand input)
     output wire [7:0] uo_out,   // 8-bit dedicated output bus (result output)
     

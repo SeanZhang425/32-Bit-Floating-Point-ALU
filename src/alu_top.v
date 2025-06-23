@@ -30,7 +30,7 @@ module alu_top (
     parameter OUTPUT_0    = 4'd10,  // Output byte 0 of result
     parameter OUTPUT_1    = 4'd11,  // Output byte 1 of result
     parameter OUTPUT_2    = 4'd12,  // Output byte 2 of result
-    parameter OUTPUT_3    = 4'd13   // Output byte 3 of result
+    parameter OUTPUT_3    = 4'd13;   // Output byte 3 of result
 
     // Register declaration
     reg [3:0]  state;       // Current state of ALU

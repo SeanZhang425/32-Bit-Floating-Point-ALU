@@ -17,19 +17,19 @@ module alu_top (
     output wire [3:0] state_out  // Current state of the ALU
 );
     // Define the finite state machine (FSM) states
-    parameter IDLE        = 4'd0,   // Waiting for start signal
-    parameter LOAD_A_0    = 4'd1,   // Load byte 0 of operand A
-    parameter LOAD_A_1    = 4'd2,   // Load byte 1 of operand A
-    parameter LOAD_A_2    = 4'd3,   // Load byte 2 of operand A
-    parameter LOAD_A_3    = 4'd4,   // Load byte 3 of operand A
-    parameter LOAD_B_0    = 4'd5,   // Load byte 0 of operand B
-    parameter LOAD_B_1    = 4'd6,   // Load byte 1 of operand B
-    parameter LOAD_B_2    = 4'd7,   // Load byte 2 of operand B
-    parameter LOAD_B_3    = 4'd8,   // Load byte 3 of operand B
-    parameter EXECUTE     = 4'd9,   // Perform the operation
-    parameter OUTPUT_0    = 4'd10,  // Output byte 0 of result
-    parameter OUTPUT_1    = 4'd11,  // Output byte 1 of result
-    parameter OUTPUT_2    = 4'd12,  // Output byte 2 of result
+    parameter IDLE        = 4'd0;   // Waiting for start signal
+    parameter LOAD_A_0    = 4'd1;   // Load byte 0 of operand A
+    parameter LOAD_A_1    = 4'd2;   // Load byte 1 of operand A
+    parameter LOAD_A_2    = 4'd3;   // Load byte 2 of operand A
+    parameter LOAD_A_3    = 4'd4;   // Load byte 3 of operand A
+    parameter LOAD_B_0    = 4'd5;   // Load byte 0 of operand B
+    parameter LOAD_B_1    = 4'd6;   // Load byte 1 of operand B
+    parameter LOAD_B_2    = 4'd7;   // Load byte 2 of operand B
+    parameter LOAD_B_3    = 4'd8;   // Load byte 3 of operand B
+    parameter EXECUTE     = 4'd9;   // Perform the operation
+    parameter OUTPUT_0    = 4'd10;  // Output byte 0 of result
+    parameter OUTPUT_1    = 4'd11;  // Output byte 1 of result
+    parameter OUTPUT_2    = 4'd12;  // Output byte 2 of result
     parameter OUTPUT_3    = 4'd13;   // Output byte 3 of result
 
     // Register declaration

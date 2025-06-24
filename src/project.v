@@ -33,7 +33,10 @@ module tt_um_32_bit_fp_ALU_S_M (
         .state_out (uio_out[7:4])   // Current state of ALU
     );
 
+    assign uio_out[2:0] = 3'b000;  // Avoid "undriven" warning
+
     // List all unused inputs to prevent warnings
     wire _unused = &{ena, uio_in[7:3], 1'b0};
+    
 
 endmodule

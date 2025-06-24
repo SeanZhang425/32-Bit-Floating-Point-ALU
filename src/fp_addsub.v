@@ -73,36 +73,36 @@ module fp_addsub (
         exp_res  = 8'd0;
         found    = 1'b0;
         
-        if (sum[24] == 1'b1) begin                     // If overflow (carry-out from MSB)
-            result[31]    <= sign_res;                 // Assign sign
-            result[30:23] <= exp_base + 1;             // Exponent increments by 1 (Note: this makes the number infinity/NaN if exp_base was 254)
-            result[22:0]  <= sum[23:1];                // Drop LSB and implicit 1
+        if (sum[24] == 1'b1) begin                      // If overflow (carry-out from MSB)
+            result[31]    <= sign_res;                  // Assign sign
+            result[30:23] <= exp_base + 1;              // Exponent increments by 1 (Note: this makes the number infinity/NaN if exp_base was 254)
+            result[22:0]  <= sum[23:1];                 // Drop LSB and implicit 1
         end else begin
             for (i = 0; i < 24; i = i + 1) begin
-                if (!found && sum[23 - i]) begin       // Find the first 1 from MSB
+                if (!found && sum[23 - i]) begin        // Find the first 1 from MSB
                     if (exp_base > i[7:0]) begin
-                        shift = i[7:0];                // Shift required
+                        shift = i[7:0];                 // Shift required
                     end else begin
-                        shift = exp_base;              // Subnormal case
+                        shift = exp_base;               // Subnormal case
                     end
                     found = 1'b1;
                 end
             end
 
-            exp_res = exp_base - shift;                // Normalize exponent
+            exp_res = exp_base - shift;                 // Normalize exponent
 
             if (!found) begin
                 // TODO: check if there's any specifications on signed zeros here
                 // it seems that it doesn't matter unless we are adding two signed zeros
-                result = 32'd0;                        // If sum is zero
+                result <= 32'd0;                        // If sum is zero
             end else if (exp_res == 8'd0) begin
-                result[31]    = sign_res;              // Sign bit
-                result[30:23] = exp_res;               // Subnormal exponent
-                result[22:0]  = sum[22:0];             // Mantissa unshifted
+                result[31]    <= sign_res;              // Sign bit
+                result[30:23] <= exp_res;               // Subnormal exponent
+                result[22:0]  <= sum[22:0];             // Mantissa unshifted
             end else begin
-                result[31]    = sign_res;              // Sign bit
-                result[30:23] = exp_res;               // Normalized exponent
-                result[22:0]  = (sum[22:0] << shift);  // Shifted mantissa
+                result[31]    <= sign_res;              // Sign bit
+                result[30:23] <= exp_res;               // Normalized exponent
+                result[22:0]  <= (sum[22:0] << shift);  // Shifted mantissa
             end
         end
     end

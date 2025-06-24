@@ -110,6 +110,10 @@ module alu_top (
                     out        <= result[31:24]; // Send byte 3
                     state      <= IDLE;          // Go back to IDLE
                 end
+                default: begin
+                    state <= IDLE;
+                    done  <= 1'b0;
+                end
             endcase
         end
     end

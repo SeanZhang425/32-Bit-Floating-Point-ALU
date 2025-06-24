@@ -11,7 +11,7 @@ def float_to_bits(f):
 def bits_to_float(b):
     return struct.unpack('>f', struct.pack('>I', b))[0]
 
-
+# Adding two positive numbers
 @cocotb.test()
 async def test_simple_add(dut):
     """Test 1.25 + 2.75 = 4.0"""
@@ -27,7 +27,7 @@ async def test_simple_add(dut):
     result = bits_to_float(dut.result.value.integer)  # Convert result back to float
     assert abs(result - expected) < 1e-6, f"Add failed: {a} + {b} != {result}"
 
-
+# Subtracting two positive numbers
 @cocotb.test()
 async def test_simple_sub(dut):
     """Test 5.5 - 3.25 = 2.25"""
@@ -43,7 +43,7 @@ async def test_simple_sub(dut):
     result = bits_to_float(dut.result.value.integer)  # Read output
     assert abs(result - expected) < 1e-6, f"Sub failed: {a} - {b} != {result}"
 
-
+# Adding a negative number and positive number
 @cocotb.test()
 async def test_negative_add(dut):
     """Test -2.0 + 3.0 = 1.0"""
@@ -59,7 +59,7 @@ async def test_negative_add(dut):
     result = bits_to_float(dut.result.value.integer)  # Read output
     assert abs(result - expected) < 1e-6, f"Neg add failed: {a} + {b} != {result}"
 
-
+# Subtracting a positive number from 0.0
 @cocotb.test()
 async def test_zero_sub(dut):
     """Test 0.0 - 5.0 = -5.0"""
@@ -75,7 +75,7 @@ async def test_zero_sub(dut):
     result = bits_to_float(dut.result.value.integer)  # Read result
     assert abs(result - expected) < 1e-6, f"Zero sub failed: {a} - {b} != {result}"
 
-
+# Testing rounding, adding two close numbers
 @cocotb.test()
 async def test_rounding(dut):
     """Test float rounding: 1.00000012 + 1e-7"""

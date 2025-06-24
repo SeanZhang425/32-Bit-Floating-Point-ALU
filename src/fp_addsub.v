@@ -87,6 +87,10 @@ module fp_addsub (
     integer i;              // Loop index for leading-1 detection
 
     always @(*) begin
+        shift    = 8'd0;
+        exp_res  = 8'd0;
+        found    = 1'b0;
+        
         if (sum[24] == 1'b1) begin                     // If overflow (carry-out from MSB)
             result[31]    = sign_res;                  // Assign sign
             result[30:23] = exp_base + 1;              // Exponent increments by 1

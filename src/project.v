@@ -19,17 +19,17 @@ module tt_um_32_bit_fp_ALU_S_M (
     input  wire       rst_n     // Active-low reset signal
 );
     // Set the direction for shared IO pins (it is static, direction never changes)
-    assign uio_oe  = 8'b1111_1000;     // io[7:4] outputs state, io[3] is the 'done' signal.
+    assign uio_oe = 8'b1111_1000;   // io[7:4] outputs state, io[3] is the 'done' signal.
 
     // Instantiate the ALU top module with standard interface
     alu_top u_alu (
-        .clk     (clk),           // Connect clock
-        .rst_n   (rst_n),         // Connect active-low reset
-        .in      (ui_in),         // Operand input byte from input pins
-        .out     (uo_out),        // Result output byte to output pins
-        .opcode  (uio_in[1:0]),   // Opcode: choose which operation for ALU to do
-        .start   (uio_in[2]),     // 'Start' signal: request ALU to do an operation
-        .done    (uio_out[3]),    // 'Done' signal: ready for outputting
+        .clk       (clk),           // Connect clock
+        .rst_n     (rst_n),         // Connect active-low reset
+        .in        (ui_in),         // Operand input byte from input pins
+        .out       (uo_out),        // Result output byte to output pins
+        .opcode    (uio_in[1:0]),   // Opcode: choose which operation for ALU to do
+        .start     (uio_in[2]),     // 'Start' signal: request ALU to do an operation
+        .done      (uio_out[3]),    // 'Done' signal: ready for outputting
         .state_out (uio_out[7:4])   // Current state of ALU
     );
 
@@ -37,6 +37,5 @@ module tt_um_32_bit_fp_ALU_S_M (
 
     // List all unused inputs to prevent warnings
     wire _unused = &{ena, uio_in[7:3], 1'b0};
-    
 
 endmodule

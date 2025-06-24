@@ -70,7 +70,7 @@ module alu_top (
             case (state)
                 IDLE: begin
                     done <= 1'b0;  // Reset done signal
-                    if (start)           // Wait for start signal
+                    if (start)     // Wait for start signal
                         state <= LOAD_A_0;
                 end
 
@@ -112,7 +112,6 @@ module alu_top (
                 end
                 default: begin
                     state <= IDLE;
-                    done  <= 1'b0;
                 end
             endcase
         end

@@ -22,7 +22,7 @@ async def test_simple_add(dut):
     dut.b.value = float_to_bits(b)  # Apply float B in IEEE 754 bit form
     dut.sub.value = 0               # 0 = add
 
-    await Timer(1, units='ns')      # Wait for result to settle
+    await Timer(1, units='us')      # Wait for result to settle
 
     result = bits_to_float(dut.result.value.integer)  # Convert result back to float
     assert abs(result - expected) < 1e-6, f"Add failed: {a} + {b} != {result}"
@@ -38,7 +38,7 @@ async def test_simple_sub(dut):
     dut.b.value = float_to_bits(b)  # Apply B
     dut.sub.value = 1               # 1 = subtract
 
-    await Timer(1, units='ns')      # Wait for result
+    await Timer(1, units='us')      # Wait for result
 
     result = bits_to_float(dut.result.value.integer)  # Read output
     assert abs(result - expected) < 1e-6, f"Sub failed: {a} - {b} != {result}"
@@ -54,7 +54,7 @@ async def test_negative_add(dut):
     dut.b.value = float_to_bits(b)  # Apply B
     dut.sub.value = 0               # Add
 
-    await Timer(1, units='ns')      # Wait for computation
+    await Timer(1, units='us')      # Wait for computation
 
     result = bits_to_float(dut.result.value.integer)  # Read output
     assert abs(result - expected) < 1e-6, f"Neg add failed: {a} + {b} != {result}"
@@ -70,7 +70,7 @@ async def test_zero_sub(dut):
     dut.b.value = float_to_bits(b)  # Apply B = 5.0
     dut.sub.value = 1               # Subtract
 
-    await Timer(1, units='ns')      # Wait for operation
+    await Timer(1, units='us')      # Wait for operation
 
     result = bits_to_float(dut.result.value.integer)  # Read result
     assert abs(result - expected) < 1e-6, f"Zero sub failed: {a} - {b} != {result}"
@@ -86,7 +86,7 @@ async def test_rounding(dut):
     dut.b.value = float_to_bits(b)  # Apply B
     dut.sub.value = 0               # Add
 
-    await Timer(1, units='ns')      # Wait for result
+    await Timer(1, units='us')      # Wait for result
 
     result = bits_to_float(dut.result.value.integer)  # Read float result
     assert abs(result - expected) < 1e-6, f"Rounding failed: {a} + {b} != {result}"

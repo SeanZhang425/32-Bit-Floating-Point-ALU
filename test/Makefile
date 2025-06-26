@@ -13,6 +13,13 @@ ifneq ($(GATES),yes)
 SIM_BUILD				= sim_build/rtl
 VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
 
+# Include the testbench sources:
+VERILOG_SOURCES += $(PWD)/unit_tests.v
+TOPLEVEL = unit_tests
+
+# MODULE is the basename of the Python test file
+MODULE = test,test_fp_addsub
+
 else
 
 # Gate level simulation:
@@ -25,19 +32,18 @@ VERILOG_SOURCES += $(PDK_ROOT)/ihp-sg13g2/libs.ref/sg13g2_stdcell/verilog/sg13g2
 
 # this gets copied in by the GDS action workflow
 VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
-VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
+
+# Include the testbench sources:
+VERILOG_SOURCES += $(PWD)/integration_tests.v
+TOPLEVEL = integration_tests
+
+# MODULE is the basename of the Python test file
+MODULE = test
 
 endif
 
 # Allow sharing configuration between design and testbench via `include`:
 COMPILE_ARGS 		+= -I$(SRC_DIR)
-
-# Include the testbench sources:
-VERILOG_SOURCES += $(PWD)/tb.v
-TOPLEVEL = tb
-
-# MODULE is the basename of the Python test file
-MODULE = test,test_fp_addsub
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim

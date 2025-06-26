@@ -4,12 +4,12 @@
     /* This testbench just instantiates the module and makes some convenient wires
     that can be driven / tested by the cocotb test.py.
     */
-    module tb ();
+    module unit_tests ();
 
     // Dump the signals to a VCD file. You can view it with gtkwave or surfer.
     initial begin
-    $dumpfile("tb.vcd");
-    $dumpvars(0, tb);
+    $dumpfile("unit_tests.vcd");
+    $dumpvars(0, unit_tests);
     #1;
     end
 

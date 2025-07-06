@@ -11,7 +11,7 @@ module alu_top (
     input  wire [7:0] in,        // 8-bit input data bus for operand bytes
     output reg  [7:0] out,       // 8-bit output data bus for result bytes
 
-    input  wire [1:0] opcode,    // 2-bit opcode
+    input  wire       opcode,    // 2-bit opcode
     input  wire       start,     // 'Start' signal for user to request an operation
     output reg        done,      // 'Done' signal indicating ready to output data
     output wire [3:0] state_out  // Current state of the ALU
@@ -39,7 +39,7 @@ module alu_top (
     reg [31:0] result;      // Final result after computation
 
     // Decide if operation is subtraction based on opcode
-    wire sub = (opcode == 2'b01);  // 1 if subtract, 0 if add
+    wire sub = opcode;  // 1 if subtract, 0 if add
 
     // Wire to receive the result from the floating-point adder/subtractor
     wire [31:0] addsub_result;

@@ -4,6 +4,9 @@
  */
 
 `default_nettype none
+
+// Prevent hierarchy flattening in synthesis to reduce fanout/resource issues
+(* keep_hierarchy = "yes" *)
 module fp_addsub (
     input  wire [31:0] a,      // Input float A (IEEE 754 format)
     input  wire [31:0] b,      // Input float B (IEEE 754 format)
@@ -85,7 +88,7 @@ module fp_addsub (
                 // Need to normalize by left-shifting mantissa
                 for (i = 0; i < 24; i = i + 1) begin
                     if (!found && sum[23 - i]) begin
-                        shift = (exp_base > i) ? i[7:0] : exp_base; // Determine amount to shift
+                        shift = (exp_base > i[7:0]) ? i[7:0] : exp_base; // WIDTHEXPAND fix: force i to 8 bits
                         found = 1'b1;
                     end
                 end

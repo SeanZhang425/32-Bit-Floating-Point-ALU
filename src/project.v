@@ -36,6 +36,6 @@ module tt_um_32_bit_fp_ALU_S_M (
     assign uio_out[2:0] = 3'b000;  // Avoid "undriven" warning
 
     // List all unused inputs to prevent warnings
-    wire _unused = &{ena, uio_in[7:3], 1'b0};
+    wire _unused = &{ena, uio_in[7:3], uio_in[1], 1'b0};
 
 endmodule

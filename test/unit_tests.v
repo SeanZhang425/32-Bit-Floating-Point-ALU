@@ -51,7 +51,7 @@ module unit_tests ();
 
 
     // Test the state machine (alu_top) on its own
-    wire [7:0] in;
+    wire [7:0] in_;
     wire [7:0] out;
     wire opcode;
     wire start;
@@ -61,7 +61,7 @@ module unit_tests ();
     alu_top state_machine (
         .clk       (clk),      // Clock input
         .rst_n     (rst_n),    // Active-low reset input
-        .in        (in),   // 8-bit input data bus for operand bytes
+        .in        (in_),   // 8-bit input data bus for operand bytes
         .out       (out),   // 8-bit output data bus for result bytes
         .opcode    (opcode),  // 1-bit opcode (0 for add, 1 for subtract)
         .start     (start),  // 'Start' signal for user to request an operation

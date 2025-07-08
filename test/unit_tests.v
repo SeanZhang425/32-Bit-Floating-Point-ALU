@@ -1,10 +1,10 @@
-    `default_nettype none
-    `timescale 1ns / 1ps
+`default_nettype none
+`timescale 1ns / 1ps
 
-    /* This testbench just instantiates the module and makes some convenient wires
-    that can be driven / tested by the cocotb test.py.
-    */
-    module unit_tests ();
+/* This testbench just instantiates the module and makes some convenient wires
+that can be driven / tested by the cocotb test.py.
+*/
+module unit_tests ();
 
     // Dump the signals to a VCD file. You can view it with gtkwave or surfer.
     initial begin
@@ -24,7 +24,6 @@
     wire [7:0] uio_out;
     wire [7:0] uio_oe;
 
-    // Replace tt_um_example with your module name:
     tt_um_32_bit_fp_ALU_S_M user_project (
         .ui_in   (ui_in),    // Dedicated inputs
         .uo_out  (uo_out),   // Dedicated outputs
@@ -35,6 +34,7 @@
         .clk     (clk),      // clock
         .rst_n   (rst_n)     // not reset
     );
+
 
     // Test the floating point adder/subtract by itself
     wire [31:0] a;
@@ -49,4 +49,24 @@
         .result (result)
     );
 
-    endmodule
+
+    // Test the state machine (alu_top) on its own
+    wire [7:0] in;
+    wire [7:0] out;
+    wire opcode;
+    wire start;
+    wire done;
+    wire [3:0] state_out;
+
+    alu_top state_machine (
+        .clk       (clk),      // Clock input
+        .rst_n     (rst_n),    // Active-low reset input
+        .in        (in),   // 8-bit input data bus for operand bytes
+        .out       (out),   // 8-bit output data bus for result bytes
+        .opcode    (opcode),  // 1-bit opcode (0 for add, 1 for subtract)
+        .start     (start),  // 'Start' signal for user to request an operation
+        .done      (done),  // 'Done' signal indicating ready to output data
+        .state_out (state_out)// Current state of the ALU
+    );
+
+endmodule

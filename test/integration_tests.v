@@ -1,10 +1,10 @@
-    `default_nettype none
-    `timescale 1ns / 1ps
+`default_nettype none
+`timescale 1ns / 1ps
 
-    /* This testbench just instantiates the module and makes some convenient wires
-    that can be driven / tested by the cocotb test.py.
-    */
-    module integration_tests ();
+/* This testbench just instantiates the module and makes some convenient wires
+that can be driven / tested by the cocotb test.py.
+*/
+module integration_tests ();
 
     // Dump the signals to a VCD file. You can view it with gtkwave or surfer.
     initial begin
@@ -24,7 +24,6 @@
     wire [7:0] uio_out;
     wire [7:0] uio_oe;
 
-    // Replace tt_um_example with your module name:
     tt_um_32_bit_fp_ALU_S_M user_project (
         .ui_in   (ui_in),    // Dedicated inputs
         .uo_out  (uo_out),   // Dedicated outputs
@@ -36,4 +35,4 @@
         .rst_n   (rst_n)     // not reset
     );
 
-    endmodule
+endmodule

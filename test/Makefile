@@ -18,7 +18,7 @@ VERILOG_SOURCES += $(PWD)/unit_tests.v
 TOPLEVEL = unit_tests
 
 # MODULE is the basename of the Python test file
-MODULE = test,test_fp_addsub
+MODULE = test,test_fp_addsub,test_alu_top
 
 else
 

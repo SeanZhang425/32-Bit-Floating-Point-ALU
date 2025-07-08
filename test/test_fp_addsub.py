@@ -9,11 +9,11 @@ PERIOD = 1000  # clock period in ns
 
 # NOTE: cocotb handles the endianness issue, so 240 = 0x00 FF = 00000000 11111111 is inputted as a[16..0] = 00000000 11111111, and not a[16..0] = 11111111 00000000 due to little endianness represents it as 0xFF 00 in memory
 # Helper function: convert Python float to 32-bit IEEE 754 bit pattern (as an integer)
-def float_to_bits(f):
+def float_to_bits(f) -> int:
     return struct.unpack('>I', struct.pack('>f', f))[0]
 
 # Helper function: convert 32-bit IEEE 754 bit pattern (as an integer) to Python float
-def bits_to_float(b):
+def bits_to_float(b) -> float:
     return struct.unpack('>f', struct.pack('>I', b))[0]
 
 # Adding two positive numbers
@@ -148,7 +148,7 @@ async def test_increase_exponent(dut):
 
 # Test decrease exponent
 @cocotb.test()
-async def test_increase_exponent(dut):
+async def test_decrease_exponent(dut):
     a, b = 8.0, 6.0
     expected = a - b
 
@@ -163,7 +163,7 @@ async def test_increase_exponent(dut):
 
 # Test add 2 subnormal numbers
 @cocotb.test()
-async def test_add_subnormals(dut):
+async def test_both_subnormals(dut):
     a, b = 1.234e-41, 5.678e-41  # 10^-41 is less than 2^-127, which is subnormal
     expected = a + b
 
@@ -175,6 +175,11 @@ async def test_add_subnormals(dut):
 
     result = bits_to_float(dut.result.value.integer)
     assert abs(result - expected) < 1e-6, f"Add 2 subnormal numbers failed: {a} + {b} != {result}"
+
+    expected = a - b
+    dut.sub.value = 1
+    await Timer(PERIOD, units='ns')
+    assert abs(result - expected) < 1e-6, f"Subtract 2 subnormal numbers failed: {a} - {b} != {result}"
 
 # Test when the result is a subnormal number
 @cocotb.test()
@@ -205,3 +210,153 @@ async def test_add_subnormal_to_normal(dut):
 
     result = bits_to_float(dut.result.value.integer)
     assert abs(result - expected) < 1e-6, f"Add subnormal number to normalized number failed: {a} + {b} != {result}"
+
+# Test Infinities
+@cocotb.test()
+async def test_result_positive_infinity(dut):
+    expected = float("inf")
+
+    a, b = float("inf"), 1242.2362642
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 0
+    await Timer(PERIOD, units='ns')
+    result = bits_to_float(dut.result.value.integer)
+    assert result == expected, f"Add finite number to infinity failed: {a} + {b} != {result}"
+
+    a, b = 6523.1235, float("-inf")
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 1
+    await Timer(PERIOD, units='ns')
+    result = bits_to_float(dut.result.value.integer)
+    assert result == expected, f"Subtract -infinity failed: {a} - {b} != {result}"
+
+    a, b = float("inf"), float("-inf")
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 1
+    await Timer(PERIOD, units='ns')
+    result = bits_to_float(dut.result.value.integer)
+    assert result == expected, f"Infinity + infinity failed: {a} - {b} != {result}"
+
+@cocotb.test()
+async def test_result_negative_infinity(dut):
+    expected = float("-inf")
+
+    a, b = float("-inf"), 9823.14
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 0
+    await Timer(PERIOD, units='ns')
+    result = bits_to_float(dut.result.value.integer)
+    assert result == expected, f"Add finite number to -infinity failed: {a} + {b} != {result}"
+
+    a, b = 2601.361, float("inf")
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 1
+    await Timer(PERIOD, units='ns')
+    result = bits_to_float(dut.result.value.integer)
+    assert result == expected, f"Subtract infinity failed: {a} - {b} != {result}"
+
+    a, b = float("-inf"), float("-inf")
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 0
+    await Timer(PERIOD, units='ns')
+    result = bits_to_float(dut.result.value.integer)
+    assert result == expected, f"-Infinity - infinity failed: {a} + {b} != {result}"
+
+@cocotb.test()
+async def test_overflow_become_infinity(dut):
+    a, b = 2.4e38, 3.1e38  # Max value for 32-bit float is around 3.4e38
+    expected = float("inf")
+
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 0
+    await Timer(PERIOD, units='ns')
+    result = bits_to_float(dut.result.value.integer)
+    assert result == expected, f"positive overflow to infinity failed: {a} + {b} != {result}"
+
+    a, b = -2.4e38, 3.1e38  # Max value for 32-bit float is around 3.4e38
+    expected = float("-inf")
+
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 1
+    await Timer(PERIOD, units='ns')
+    result = bits_to_float(dut.result.value.integer)
+    assert result == expected, f"negative overflow to infinity failed: {a} + {b} != {result}"
+
+# Test NaNs
+@cocotb.test()
+async def test_input_nan(dut):
+    expected = float("nan")
+
+    a, b = float("-nan"), 9823.14
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 0
+    await Timer(PERIOD, units='ns')
+    result = bits_to_float(dut.result.value.integer)
+    # Use str since NaN == NaN usually evaluates to false
+    assert str(result) == str(expected), f"Add finite number to -infinity failed: {a} + {b} != {result}"
+
+    a, b = 2601.361, float("nan")
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 1
+    await Timer(PERIOD, units='ns')
+    result = bits_to_float(dut.result.value.integer)
+    assert str(result) == str(expected), f"Subtract infinity failed: {a} - {b} != {result}"
+
+    a, b = float("nan"), float("nan")
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 0
+    await Timer(PERIOD, units='ns')
+    result = bits_to_float(dut.result.value.integer)
+    assert str(result) == str(expected), f"-Infinity - infinity failed: {a} + {b} != {result}"
+
+@cocotb.test()
+async def test_infinity_sub_infinity(dut):
+    expected = float("nan")
+
+    a, b = float("inf"), float("inf")
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 1
+    await Timer(PERIOD, units='ns')
+    result = bits_to_float(dut.result.value.integer)
+    assert str(result) == str(expected), f"infinity - infinity failed: {a} - {b} != {result}"
+
+# Test signed zeros and underflow
+@cocotb.test()
+async def test_negative_zero_add_positive_zero(dut):
+    a, b = -0.0, 0.0
+    expected = 0.0
+
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 0
+
+    await Timer(PERIOD, units='ns')
+
+    result = bits_to_float(dut.result.value.integer)
+    assert result == expected, f"Add negative zero to positive zero failed: {a} + {b} != {result}"
+
+@cocotb.test()
+async def test_result_negative_zero(dut):
+    a, b = -0.0, 0.0
+    expected = -0.0
+
+    dut.a.value = float_to_bits(a)
+    dut.b.value = float_to_bits(b)
+    dut.sub.value = 0
+
+    await Timer(PERIOD, units='ns')
+
+    result = bits_to_float(dut.result.value.integer)
+    assert result == expected, f"Result should have been negative zero: {a} + {b} != {result}"

@@ -76,10 +76,6 @@ module fp_addsub (
     reg [7:0] shift;     // Number of left shifts required for normalization
 
     always @(*) begin
-        // Default result to 0
-        // result = 32'd0;
-        // shift = 8'd0;
-
         // Special case: NaN or inf - inf
         if (is_nan_a | is_nan_b | (is_inf_a & is_inf_b & (sign_a ^ sign_b))) begin
             result = 32'h7FC00000; // Return quiet NaN (+qNaN)
@@ -106,7 +102,7 @@ module fp_addsub (
         else if (sum[24] == 1'b1) begin
             result[31]    = sign_res;           // Sign bit
             result[30:23] = exp_base + 1;       // Increase exponent
-            result[22:0]  = sum[23:1];          // Drop LSB and leading 1
+            result[22:0]  = (exp_base + 1 == 8'hFF) ? 0 : sum[23:1];  // If overflow, set to infinity. Otherwise, drop LSB and implicit 1
         end
         // Else normalize using priority encoder
         else begin

@@ -11,7 +11,7 @@ module alu_top (
     input  wire [7:0] in,        // 8-bit input data bus for operand bytes
     output reg  [7:0] out,       // 8-bit output data bus for result bytes
 
-    input  wire       opcode,    // 2-bit opcode
+    input  wire       opcode,    // 1-bit opcode (0 for add, 1 for subtract)
     input  wire       start,     // 'Start' signal for user to request an operation
     output reg        done,      // 'Done' signal indicating ready to output data
     output wire [3:0] state_out  // Current state of the ALU
